@@ -479,9 +479,7 @@ $ sudo systemctl status iptables
 # systemctl start dnsmasq
 ```
 
-
-
-## 5. Test everything
+## 5. Test everything!
 
 ### 4.1 First test: create a demo app.
 
