@@ -4,10 +4,10 @@ A full detailed guide to install `Openshift (OKD)` into a single or more VMs usi
 This guide is mostly based on:
 
 - [dnsmasq appendix](https://github.com/openshift/training/blob/master/deprecated/beta-4-setup.md#appendix---dnsmasq-setup) from the [openshift-training](https://github.com/openshift/training) repo. 
-- [openshift ansible playbook](https://github.com/openshift/openshift-ansible).
+- [openshift-ansible playbook](https://github.com/openshift/openshift-ansible).
 - [gshipley installcentos scripts](https://github.com/gshipley/installcentos).
 - [libvirt howto](https://github.com/openshift/installer/blob/master/docs/dev/libvirt-howto.md).
-- [jlebon/dnsmasq.md gist](https://gist.github.com/jlebon/0cfcd3dcc7ac7de18a69).
+- [jlebon/dnsmasq gist](https://gist.github.com/jlebon/0cfcd3dcc7ac7de18a69).
 
 However, I updated it for my needs and included fixes for the many gotchas I found along the way.
 
@@ -15,8 +15,7 @@ This is useful for folks who want to set up a DNS service as part of the cluster
 easily change their DNS setup outside of the cluster, or just because they want to keep the cluster setup self-contained.
 
 **TL;DR**
-- You can't modify external DNS
-- You router sux
+- You can't modify external DNS and/or your router sux
 - You can't modify your router or anything but your libvirt host
 - You want to expose your cloud inside a LAN not internet (over WiFi)
 - You don't want to use minishift installation
@@ -70,13 +69,19 @@ Eventually, I hope to convert this to an ansible playbook. Thanks for your under
 
 For my current scenario, I'll be using my dear old Alienware 18.<br>
 This machine is currently using the following hardware:
-- Samsung EVO 850 SSD
+- Samsung EVO 850 SSD 500 GB
 - 32 GB RAM Kingston HyperX Impact DDR3 SO-DIMM 1600 MHz
 - Intel(R) Core(TM) i7-4800MQ CPU @ 2.70GHz
 
 ### 1.2 Choose your linux distro
 
 For the bare-metal 'bulky' laptop I have choosen to use Fedora 29.<br>You can install a server centered OS like CentOS or Red Hat Enterprise Linux (requires active subscription).
+After installation, update your yum packages:
+
+```
+$ sudo yum -y update
+$ sudo shutdown -r now
+```
 
 ### 1.3 Install libvirt
 
@@ -132,18 +137,83 @@ Then
 `$ sudo systemctl restart NetWorkManager`<br>
 If everything was setup correctly, you'll get connected with a static-ip address
 
-## 2. Setup the openshift libvirt guest (VM)
+## 2. Setup libvirt guest (VM)
+
+### 2.1 Setup libvirt using virt-manager
 
 Open `virt-manager` application, then check if you're currently have an virtual-network configured.<br>
 If you don't, create a new one following the image below:
 
-![alt text](02/a.png "Logo Title Text 1")
+![virtual-network](images/02/a.png "'default' virtual-network using virbr0 - inet 192.168.50.1/24")
 
 To keep this virtual-network active every boot, then:
 `$ sudo virsh net-autostart default`
 
+Then, install the guest ISO image (I'll be using CentOS-7):
+![iso](images/02/c.png "CentOS 7 iso file")
 
-### 2.1 Choose your host machine
+And finally check if your wireless interface is currently active with start mode set to onboot:
+![wireless-interface](images/02/b.png "Ethernet status")
+
+### 2.2 Deploy the kickstart.cfg to create an automated installation
+
+Inside you host, you may want to install httpd server to bypass the guest GUI configuration.
+To do so, you'll need to host the kickstart file to be accessible from `virt-install` command.
+
+```
+$ sudo yum -y install httpd
+
+# if you're using firewalld:
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --reload
+
+sudo systemctl start httpd
+sudo systemctl enable httpd
+sudo systemctl status httpd
+```
+
+Then, create the following directory:
+`mkdir /var/www/html/ks-cfg`<br>
+And put the `server-ks-openshift.cfg` into that folder, and apply permissions:
+```
+$ cd ocp-arekkusu
+$ sudo mv server-ks-openshift.cfg /var/www/html/ks-cfg/
+$ sudo chmod 777 /var/www/html/ks-cfg/server-ks-openshift.cfg
+```
+
+After this, you should be able to grab the kickstart from the browser.<br>
+Try navigating to the address `http://<IP>/ks-cfg/server-ks-openshift.cfg`
+
+You are good to keep following the guide for installing the guest.
+
+### 2.3 Create the openshift guest VM (virt-install)
+
+With your kickstart configured and deployed into httpd, you can use it to create an automated installation using `virt-install` command.
+<br>
+Observe the following parameters bellow and change them accordingly to your current environment.
+
+```
+virt-install -n "openshift" --ram 26000 --vcpus 6 --metadata description="openshift cluster" \
+--location "/home/raphael/Downloads/_iso/CentOS-7-x86_64-DVD-1804.iso" --os-type=linux \
+--os-variant=rhel7 --boot cdrom,hd,menu=on --disk path=/var/lib/libvirt/images/openshift.qcow2,size=200,sparse=false,cache=none \
+--input keyboard --extra-args="ks=http://192.168.0.10/ks-cfg/server-ks-openshift.cfg ip=dhcp console=tty0 console=ttyS0,115200n8 serial" \
+--network network:default --nographics
+```
+
+Your guest will start to install and after you will be prompted for root access in the console.
+
+Tip:
+The `server-ks-openshift.cfg` file have the root password defined as `admin12345`
+
+You should be able to see the guest running like the following image:
+
+![guest](images/02/d.png "Guest VM first boot")
+
+
+## 3. Install Openshift from openshift-ansible playbook into recently created libvirt guest (VM)
+
+### 3.1 Setup libvirt using virt-manager
 
 
 ================================================================
