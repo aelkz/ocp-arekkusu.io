@@ -152,6 +152,8 @@ To keep this virtual-network active every boot, then:
 Then, install the guest ISO image (I'll be using CentOS-7):
 ![iso](images/02/c.png "CentOS 7 iso file")
 
+PS. You can download CentOS 7 iso from [here](https://www.centos.org/download/)
+
 And finally check if your wireless interface is currently active with start mode set to onboot:
 ![wireless-interface](images/02/b.png "Ethernet status")
 
@@ -183,7 +185,8 @@ $ sudo chmod 777 /var/www/html/ks-cfg/server-ks-openshift.cfg
 ```
 
 After this, you should be able to grab the kickstart from the browser.<br>
-Try navigating to the address `http://<IP>/ks-cfg/server-ks-openshift.cfg`
+Try navigating to the address `http://<IP>/ks-cfg/server-ks-openshift.cfg`<br>
+Example: `http://192.168.0.10/ks-cfg/server-ks-openshift.cfg`
 
 You are good to keep following the guide for installing the guest.
 
@@ -201,7 +204,7 @@ virt-install -n "openshift" --ram 26000 --vcpus 6 --metadata description="opensh
 --network network:default --nographics
 ```
 
-Your guest will start to install and after you will be prompted for root access in the console.
+Your guest will start to install *automagically* and after you will be prompted for root access in the console.
 
 Tip:
 The `server-ks-openshift.cfg` file have the root password defined as `admin12345`
@@ -210,10 +213,80 @@ You should be able to see the guest running like the following image:
 
 ![guest](images/02/d.png "Guest VM first boot")
 
+### 2.4 Check guest network configuration
+
+In order to keep everything setup for the next steps, certify that network settings are well defined.<br>
+Like the `host`, the `guest` must have an static address. Try navigating to `/etc/sysconfig/network-scripts` and check the `ifcfg-eth0` file.
+
+The configuration must look like the following:
+```
+IPV6INIT="no"
+DHCP_HOSTNAME="localhost.localdomain"
+DNS2="8.8.4.4"
+DNS1="8.8.8.8"
+BOOTPROTO="static"
+GATEWAY=192.168.50.1
+DEVICE="eth0"
+NETMASK=255.255.255.0
+IPADDR=192.168.50.10
+ONBOOT="yes"
+UUID=9x99x9x-99x9-9x99x-xxxx-99xx99x9x9xxx9x9
+PEERDNS=no
+```
+
+### 2.5 Update and install extra tools
+
+Access guest VM through ssh protocol:<br>
+`$ ssh root@192.168.50.10`
+
+Update yum packages and install additional tools:
+```
+$ sudo yum -y update
+$ sudo yum install git docker net-tools nmap
+```
+
+Restart guest:
+`$ sudo shutdown -r now`
 
 ## 3. Install Openshift from openshift-ansible playbook into recently created libvirt guest (VM)
 
-### 3.1 Setup libvirt using virt-manager
+### 3.1 Execute the openshift-ansible playbook
+
+Access guest through ssh protocol again:<br>
+`$ ssh root@192.168.50.10`
+
+Download the *openshift-ansible playbook* from the [gshipley installcentos scripts](https://github.com/gshipley/installcentos) repository:
+```
+git clone https://github.com/gshipley/installcentos.git
+
+export DOMAIN=arekkusu.io
+export USERNAME=admin
+export PASSWORD=admin
+
+cd installcentos
+./install-openshift.sh
+```
+
+PS. Set your domain name and username/password to your needs.
+
+After the ansible-playbook installation, you should see the following output:
+```
+******
+* Your console is https://console.arekkusu.io:8443
+* Your username is admin
+* Your password is admin
+* 
+* Login using:
+*
+$ oc login -u admin -p admin https://console.arekkusu.io:8443/
+******
+```
+
+Test your installation accessing through web browser:
+![openshift](images/03/a.png "OKD first login")
+
+
+Great! Let's go for the 
 
 
 ================================================================
