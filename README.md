@@ -17,10 +17,10 @@ easily change their DNS setup outside of the cluster, or just because they want 
 
 **TL;DR**
 - You can't modify external DNS and/or your router sux :angry:
-- You can't modify your router or anything but your libvirt host
-- You want to expose your cloud inside a LAN (WiFi) not internet
-- You don't want to use minishift project
-- You have a 'bulky' laptop or Desktop PC for use as dedicated openshit cluster and want to work from another computer with development tools only
+- You can't modify your router or anything but your libvirt host :cry:
+- You want to expose your cloud inside a LAN (WiFi) not internet :heavy_check_mark:
+- You don't want to use minishift project :heavy_check_mark:
+- You have a 'bulky' laptop or Desktop PC for use as dedicated openshit cluster and want to work from another computer with development tools only :heavy_check_mark:
 
 This is meant to be done *before* you run the `openshift-ansible` playbook, but it can be adjusted if you have already installed openshift using `openshift-ansible` playbook.
 If you already have docker running, you will have to restart it after doing these steps.
@@ -68,7 +68,7 @@ Eventually, I hope to convert this to an ansible playbook. Thanks for your under
 
 ### 1.1 Choose your host machine
 
-For my current scenario, I'll be using my dear old Alienware 18.<br>
+For my current scenario, I'll be using my dear old Alienware 18 :rocket:<br>
 This machine is currently using the following hardware:
 - Samsung EVO 850 SSD 500 GB
 - 32 GB RAM Kingston HyperX Impact DDR3 SO-DIMM 1600 MHz
@@ -76,7 +76,7 @@ This machine is currently using the following hardware:
 
 ### 1.2 Choose your linux distro
 
-For the bare-metal 'bulky' laptop I have choosen to use Fedora 29.<br>You can install a server centered OS like CentOS or Red Hat Enterprise Linux (requires active subscription).
+For the bare-metal 'bulky' laptop I have choosen to use Fedora 29.<br>You can install a server centered OS like CentOS or Red Hat Enterprise Linux (requires active subscription).<br>
 After installation, update your yum packages:
 
 ```
@@ -84,12 +84,12 @@ $ sudo yum -y update
 $ sudo shutdown -r now
 ```
 
-### 1.3 Install libvirt
+### 1.3 Install libvirt, git and docker
 
 After the OS installation steps, execute the following in the terminal:
 
 ```
-$ sudo dnf install -y qemu-kvm libvirt virt-manager virt-install bridge-utils net-tools nmap
+$ sudo dnf install -y qemu-kvm libvirt virt-manager virt-install bridge-utils net-tools nmap git docker
 $ sudo gpasswd -a "${USER}" libvirt
 $ sudo shutdown -r now
 ```
@@ -136,12 +136,12 @@ DNS2=999.999.999.999
 
 Then
 `$ sudo systemctl restart NetWorkManager`<br>
-If everything was setup correctly, you'll get connected with a static-ip address
+If everything was setup correctly, you'll get connected with a static-ip address.
 
 ### 1.5 Configure host IPv4 forwarding
 
-Libvirt creates a bridged connection to the host machine, but in order for the network bridge to work IP forwarding needs to be enabled. 
-To enable guest request forwarding you need to enable the `net.ipv4.ip_forward=1`. Execute the following:
+`libvirt` creates a bridged connection to the host machine, but in order for the network bridge to work IP forwarding needs to be enabled. 
+To enable guest request forwarding you need to enable the `net.ipv4.ip_forward=1`.<br>Execute the following:
 
 ```
 echo "net.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/99-ipforward.conf
@@ -150,7 +150,7 @@ sudo sysctl -p /etc/sysctl.d/99-ipforward.conf
 
 ### 1.6 Configure iptables rules
 
-The following rules are necessary to enable openshift applications be accessible from LAN, as the `guest` is NATed:
+The following rules are necessary to enable openshift applications be accessible from LAN, as the `guest` is **NAT**ed:
 ```
 iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8443 -j DNAT --to-destination 192.168.50.10:8443
 iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8080 -j DNAT --to-destination 192.168.50.10:8080
@@ -159,7 +159,7 @@ iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 443 -j DNAT --to-de
 iptables -I FORWARD -m state -d 192.168.50.10/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT
 ```
 
-PS. There are other ways to do this, you may want to use firewalld instead.
+PS. There are other ways to do this, you may want to use `firewalld` instead.
 
 ## 2. Setup libvirt guest (VM)
 
@@ -168,42 +168,43 @@ PS. There are other ways to do this, you may want to use firewalld instead.
 Open `virt-manager` application, then check if you're currently have an virtual-network configured.<br>
 If you don't, create a new one following the image below:
 
+![virtual-network](images/02/e.png "'default' virtual-network using virbr0 - inet 192.168.50.1/24")
+
 ![virtual-network](images/02/a.png "'default' virtual-network using virbr0 - inet 192.168.50.1/24")
 
-To keep this virtual-network active every boot, then:
+To keep this virtual-network active every boot, then execute:<br>
 `$ sudo virsh net-autostart default`
 
-Then, install the guest ISO image (I'll be using CentOS-7):
+Then, install the guest ISO image (I'll be using [CentOS-7.5.1804](http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso)):
 ![iso](images/02/c.png "CentOS 7 iso file")
-
-PS. You can download CentOS 7 iso from [here](https://www.centos.org/download/)
 
 And finally check if your wireless interface is currently active with start mode set to onboot:
 ![wireless-interface](images/02/b.png "Ethernet status")
 
 ### 2.2 Deploy the kickstart.cfg into apache to create an automated installation
 
-Inside you host, you may want to install httpd server to bypass the guest GUI configuration.
+Inside you host, you may want to install `httpd` server to bypass the `guest` GUI configuration. :sunglasses:<br>
 To do so, you'll need to host the kickstart file to be accessible from `virt-install` command.
 
 ```
 $ sudo yum -y install httpd
 
 # if you're using firewalld:
-sudo firewall-cmd --permanent --add-port=80/tcp
-sudo firewall-cmd --permanent --add-port=443/tcp
-sudo firewall-cmd --reload
+$ sudo firewall-cmd --permanent --add-port=80/tcp
+$ sudo firewall-cmd --permanent --add-port=443/tcp
+$ sudo firewall-cmd --reload
 
-sudo systemctl start httpd
-sudo systemctl enable httpd
-sudo systemctl status httpd
+$ sudo systemctl start httpd
+$ sudo systemctl enable httpd
+$ sudo systemctl status httpd
 ```
 
 Then, create the following directory:
-`mkdir /var/www/html/ks-cfg`<br>
+`$ sudo mkdir /var/www/html/ks-cfg`<br>
 And put the `server-ks-openshift.cfg` into that folder, and apply permissions:
 ```
-$ cd ocp-arekkusu
+$ git clone https://github.com/aelkz/ocp-arekkusu.io.git
+$ cd ocp-arekkusu.io
 $ sudo mv server-ks-openshift.cfg /var/www/html/ks-cfg/
 $ sudo chmod 777 /var/www/html/ks-cfg/server-ks-openshift.cfg
 ```
@@ -212,13 +213,13 @@ After this, you should be able to grab the kickstart from the browser.<br>
 Try navigating to the address `http://<IP>/ks-cfg/server-ks-openshift.cfg`<br>
 Example: `http://192.168.0.10/ks-cfg/server-ks-openshift.cfg`
 
-You are good to keep following the guide for installing the guest.
+You are good to keep reading the guide for the next steps.
 
 ### 2.3 Create the openshift guest VM (virt-install)
 
-With your kickstart configured and deployed into httpd, you can use it to create an automated installation using `virt-install` command.
+With your kickstart configured and deployed into `httpd`, you can use it to create an automated installation using `virt-install` command.
 <br>
-Observe the following parameters bellow and change them accordingly to your current environment.
+Observe the following parameters bellow and change them accordingly to your currently desired environment.
 
 ```
 virt-install -n "openshift" --ram 26000 --vcpus 6 --metadata description="openshift cluster" \
@@ -228,7 +229,7 @@ virt-install -n "openshift" --ram 26000 --vcpus 6 --metadata description="opensh
 --network network:default --nographics
 ```
 
-Your guest will start to install *automagically* and after you will be prompted for root access in the console.
+Your guest will start to install :boom: *automagically* :boom: and after you will be prompted for root access in the console.
 
 Tip:
 The `server-ks-openshift.cfg` file have the root password defined as `admin12345`
@@ -263,13 +264,13 @@ PEERDNS=no
 Access guest VM through ssh protocol:<br>
 `$ ssh root@192.168.50.10`
 
-Update yum packages and install additional tools:
+Update `yum` packages and install additional tools:
 ```
 $ sudo yum -y update
 $ sudo yum install git docker net-tools nmap
 ```
 
-Restart guest:
+Restart `guest`:
 `$ sudo shutdown -r now`
 
 ## 3. Install Openshift from openshift-ansible playbook into recently created libvirt guest (VM)
@@ -316,13 +317,13 @@ Check your current version, accessing the following path:
 
 ![openshift](images/03/b.png "OKD version")
 
-Great! Let's go for the final steps.
+Great! Let's go for the final steps. :sparkling_heart:
 
 ## 4. Prepare your DNS OKD with dnsmasq
 
 ### 4.1 Install dnsmasq
 
-Choose and ssh into the node on which you want to install dnsmasq (mine is `guest` VM at 192.168.50.10). This node will be the one that all the other nodes
+Choose and `ssh` into the node on which you want to install dnsmasq (mine is `guest` VM at `192.168.50.10`). This node will be the one that all the other nodes
 will contact for DNS resolution.  *Do not* install it on any of the master nodes, since it will conflict with the Kubernetes DNS service.
 
 PS. For my current scenario, I'll be using the only node that was created - i.e. the guest VM at `192.168.50.10`
@@ -484,7 +485,7 @@ $ sudo systemctl status iptables
 ### 4.1 First test: create a demo app.
 
 First of all, we want to make sure everything is working fine through the OKD `host`.
-ssh into `host` at 192.168.0.10 and let's create a demo application.
+ssh into `host` at `192.168.0.10` and let's create a demo application.
 
 Copy the login command from the web console:
 
@@ -511,8 +512,14 @@ NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)           
 docker-registry    ClusterIP   172.30.73.96     <none>        5000/TCP                  3d
 ```
 
-PS. This probably should need further investigation. For now, I can solve it this way. =/<br>
-Try restarting the `guest` VM after modifying the `/etc/hosts` file.
+PS. This probably should need further investigation. :weary: For now, I can solve it this way. :neutral_face:<br>
+Try restarting the `guest` VM after modifying the `/etc/hosts` file:
+
+```
+virsh shutdown openshift
+virsh start openshift
+# wait a few minutes for the cluster boot process.
+```
 
 You should see your application running:
 
@@ -521,7 +528,7 @@ You should see your application running:
 Test your application, opening the web browser: `http://myapp-demo.apps.arekkusu.io` or via curl:<br>
 `curl -s -o /dev/null -w "%{http_code}" http://myapp-demo.apps.arekkusu.io` and check if it returns status code 200.
 
-### 4.2 Second test: access custom addresses inside myapp`s POD.
+### 4.2 Second test: access custom addresses inside myapp's POD.
 
 This will ensure that your POD can communicate with another PODs using your cluster DNS.
 Also it will test if you can access custom created routes.
@@ -540,16 +547,16 @@ Test: `ping grafana-openshift-monitoring.apps.arekkusu.io`<br>
 Test: `ping apiserver-kube-service-catalog.apps.arekkusu.io`<br>
 Test: `ping myapp-demo-internal.192.168.50.10.nip.io`<br>
 
-All hostnames must be pingable. You can also use `dig` command.
+All hostnames must be pingable. You can also use `dig` command (change the hostnames accordingly to your environment).
 
 ### 4.3 Final test: access custom addresses from another computer inside LAN.
 
-From the same WiFi network, test if another computer can access the custom address tested previously.
+From the same WiFi network, test if another computer can access the addresses tested previously.
 Get into a laptop computer or another Desktop PC and execute the following commands:
 
 Test: `ping grafana-openshift-monitoring.apps.arekkusu.io`<br>
 Test: `ping apiserver-kube-service-catalog.apps.arekkusu.io`<br>
 Test: `ping myapp-demo.apps.arekkusu.io`<br>
 
-Voilá! If you have reached this point, you're ready to go!<br>
-Thank you and if you want to contribute don't hesitate.
+Voilá! If you have reached this point, you're ready to go! :sunglasses:<br>
+Thank you and if you want to contribute don't hesitate. :satisfied:
