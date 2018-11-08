@@ -16,7 +16,7 @@ This is useful for folks who want to set up a DNS service as part of the cluster
 easily change their DNS setup outside of the cluster, or just because they want to keep the cluster setup self-contained.
 
 **TL;DR**
-- You can't modify external DNS and/or your router sux
+- You can't modify external DNS and/or your router sux :angry:
 - You can't modify your router or anything but your libvirt host
 - You want to expose your cloud inside a LAN (WiFi) not internet
 - You don't want to use minishift project
