@@ -515,6 +515,7 @@ PS. This probably should need further investigation. For now, I can solve it thi
 Try restarting the `guest` VM after modifying the `/etc/hosts` file.
 
 You should see your application running:
+
 ![wildfly](images/05/b.png "Web Console : My First App")
 
 Test your application, opening the web browser: `http://myapp-demo.apps.arekkusu.io` or via curl:<br>
