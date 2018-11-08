@@ -280,7 +280,7 @@ Restart `guest`:
 Access guest through ssh protocol again:<br>
 `$ ssh root@192.168.50.10`
 
-Download the *openshift-ansible playbook* from the [gshipley installcentos scripts](https://github.com/gshipley/installcentos) repository:
+Execute the *openshift-ansible playbook* from [gshipley installcentos scripts](https://github.com/gshipley/installcentos) installation script: 
 ```
 git clone https://github.com/gshipley/installcentos.git
 
@@ -292,7 +292,8 @@ cd installcentos
 ./install-openshift.sh
 ```
 
-PS. Set your domain name and username/password accordingly to your needs.
+PS. Set your domain name and username/password accordingly to your needs.<br>
+You may also change the `inventory.ini` parameters, in order to have a larger infrastructure. See more details [here](https://github.com/openshift/openshift-ansible)
 
 ### 3.2 Test openshift after installation
 
