@@ -8,6 +8,7 @@ This guide is mostly based on:
 - [gshipley installcentos scripts](https://github.com/gshipley/installcentos).
 - [libvirt howto](https://github.com/openshift/installer/blob/master/docs/dev/libvirt-howto.md).
 - [jlebon/dnsmasq gist](https://gist.github.com/jlebon/0cfcd3dcc7ac7de18a69).
+- [getting started with wildfly](https://blog.openshift.com/getting-started-with-wildfly)
 
 However, I updated it for my needs and included fixes for the many gotchas I found along the way.
 
@@ -485,7 +486,7 @@ $ sudo systemctl status iptables
 First of all, we want to make sure everything is working fine through the OKD `host`.
 ssh into `host` at 192.168.0.10 and let's create a demo application.
 
-Copy the login command from the web console like:
+Copy the login command from the web console:
 
 ![openshift](images/05/a.png "Web Console : Copy Login Command")
 
@@ -510,7 +511,11 @@ NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)           
 docker-registry    ClusterIP   172.30.73.96     <none>        5000/TCP                  3d
 ```
 
-PS. This probably should need further investigation. For now, I can solve it this way. =/
+PS. This probably should need further investigation. For now, I can solve it this way. =/<br>
+Try restarting the `guest` VM after modifying the `/etc/hosts` file.
+
+You should see your application running:
+![wildfly](images/05/b.png "Web Console : My First App")
 
 Test your application, opening the web browser: `http://myapp-demo.apps.arekkusu.io` or via curl:<br>
 `curl -s -o /dev/null -w "%{http_code}" http://myapp-demo.apps.arekkusu.io` and check if it returns status code 200.
