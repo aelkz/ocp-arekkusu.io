@@ -464,14 +464,15 @@ The following rules are necessary to enable openshift applications be accessible
 
 Usually you'll just need to save the previously created iptables rules into `/etc/syconfig/iptables`. But libvirtd process don't works that way. You need to apply the iptables rules upon `guest` start.
 
-So, saving everything to persist when you reboot the `host` using the following will not work:
+So, saving everything to persist using the following method **will not work**:
 ```
 # iptables-save > /etc/sysconfig/iptables
 # systemctl restart iptables
 ```
 
-Will need to create a custom script that will hook the libvirt starting process.
-To do so, check the ![qemu](addons/qemu") script and follow it's orientations.
+You'll need to create a custom script that will **hook the libvirt starting process**.
+To do so, check the ![qemu](addons/qemu") script and follow it's orientations. 
+This script is intended to execute all iptables rules upon `guest` start and delete them upon `guest` shutdown.
 
 Maybe you'll need to restart the `host` in order to work properly.
 
