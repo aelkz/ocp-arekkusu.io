@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# this is /etc/libvirt/hooks/qemu
+# see also http://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections
+# don't forget to make this file executable using: $ sudo chmod +x /etc/libvirt/hooks/qemu
+# restart libvirt and start vm later:
+# $ sudo systemctl restart libvirtd
+# $ sudo virsh start ${GUEST_NAME}
+
+# https://avdv.github.io/libvirt/hooks.html
+HOST_IP="192.168.0.10"
+GUEST_IP="192.168.50.10"
+GUEST_NAME="openshift"
+
+# list of iptables rules to be triggered
+# this will only persist during execution of libvirt (the actual /etc/sysconfig/iptables file won't be modified)
+RULE_1="/sbin/iptables -t nat -I PREROUTING -p tcp -d ${HOST_IP} --dport 8443 -j DNAT --to-destination ${GUEST_IP}:8443"
+RULE_2="/sbin/iptables -t nat -I PREROUTING -p tcp -d ${HOST_IP} --dport 8080 -j DNAT --to-destination ${GUEST_IP}:8080"
+RULE_3="/sbin/iptables -t nat -I PREROUTING -p tcp -d ${HOST_IP} --dport 80 -j DNAT --to-destination ${GUEST_IP}:80"
+RULE_4="/sbin/iptables -t nat -I PREROUTING -p tcp -d ${HOST_IP} --dport 443 -j DNAT --to-destination ${GUEST_IP}:443"
+RULE_5="/sbin/iptables -I FORWARD -m state -d ${GUEST_IP}/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT"
+
+RULE_1_DELETE="`echo \"${COMMAND_1}\" | sed -e \"s/-I/-D/\"`"
+RULE_2_DELETE="`echo \"${COMMAND_2}\" | sed -e \"s/-I/-D/\"`"
+RULE_3_DELETE="`echo \"${COMMAND_3}\" | sed -e \"s/-I/-D/\"`"
+RULE_4_DELETE="`echo \"${COMMAND_4}\" | sed -e \"s/-I/-D/\"`"
+RULE_5_DELETE="`echo \"${COMMAND_5}\" | sed -e \"s/-I/-D/\"`"
+
+if [ "${1}" = "${GUEST_NAME}" ]; then
+  if [ "${2}" = "stopped" -o "${2}" = "reconnect" ]; then
+    hwclock >>/root/hook.log
+    echo "kvm-Ho." >>/root/hook.log
+    echo " " >>/root/hook.log
+
+    ${RULE_1_DELETE}
+    ${RULE_2_DELETE}
+    ${RULE_3_DELETE}
+    ${RULE_4_DELETE}
+    ${RULE_5_DELETE}
+  fi
+  if [ "${2}" = "start" -o "${2}" = "reconnect" ]; then
+    hwclock >>/root/hook.log
+    echo "kvm-Ho1." >>/root/hook.log
+    echo " " >>/root/hook.log
+
+    ${RULE_1}
+    ${RULE_2}
+    ${RULE_3}
+    ${RULE_4}
+    ${RULE_5}
+  fi
+fi
