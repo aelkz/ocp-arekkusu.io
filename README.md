@@ -499,7 +499,7 @@ PS. If you get the following error during image build process:
 dial tcp: lookup docker-registry.default.svc on 8.8.8.8:53
 ```
 It's because your registry cannot be found inside cluster. I don't know what may have did this, I had to add the following line in `guest` VM `/etc/hosts` file:<br>
-`172.30.73.96   docker-registry.default.svc docker-registry.default.svc.cluster.local`<br>where `172.30.73.96` is the docker registry cluster ip address obtained from:
+`172.30.73.96   docker-registry.default.svc docker-registry.default.svc.cluster.local docker-registry-default.apps.arekkusu.io`<br>where `172.30.73.96` is the docker registry cluster ip address obtained from:
 
 ```
 $ oc get svc -n default
