@@ -147,20 +147,6 @@ To enable guest request forwarding you need to enable the `net.ipv4.ip_forward=1
 echo "net.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/99-ipforward.conf
 sudo sysctl -p /etc/sysctl.d/99-ipforward.conf
 ```
-
-### 1.6 Configure iptables rules
-
-The following rules are necessary to enable openshift applications be accessible from LAN, as the `guest` is **NAT**ed:
-```
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8443 -j DNAT --to-destination 192.168.50.10:8443
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8080 -j DNAT --to-destination 192.168.50.10:8080
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 80 -j DNAT --to-destination 192.168.50.10:80
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 443 -j DNAT --to-destination 192.168.50.10:443
-iptables -I FORWARD -m state -d 192.168.50.10/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT
-```
-
-PS. There are other ways to do this, you may want to use `firewalld` instead.
-
 ## 2. Setup libvirt guest (VM)
 
 ### 2.1 Setup libvirt using virt-manager
@@ -448,28 +434,39 @@ Otherwise, the `openshift-ansible` playbook will disable and mask it and we will
 replace it with `iptables-services`:
 
     ```
-    # systemctl stop firewalld
-    # systemctl disable firewalld
-    # systemctl mask firewalld
-    # yum install -y iptables-services
-    # systemctl enable iptables
-    # systemctl start iptables
+    # yum -y install iptables-services; systemctl disable firewalld; systemctl mask firewalld; service iptables restart; service iptables save
     ```
 
 ### 4.8 Install the DNS iptables rules (main cluster)
 
-Rules for dnsmasq service:
+First, create a backup of your existing iptables rules:
+```
+# cp /etc/sysconfig/iptables-config /etc/sysconfig/iptables-config.original.backup
+# cp /etc/sysconfig/iptables /etc/sysconfig/iptables.original.backup
+```
+
+Add rules for dnsmasq service:
 ```
 # iptables -I INPUT 1 -p TCP --dport 53 -j ACCEPT
 # iptables -I INPUT 1 -p UDP --dport 53 -j ACCEPT
-# iptables-save > /etc/sysconfig/iptables
+```
+
+The following rules are necessary to enable openshift applications be accessible from LAN, as the `guest` is **NAT**ed:
+```
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8443 -j DNAT --to-destination 192.168.50.10:8443
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8080 -j DNAT --to-destination 192.168.50.10:8080
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 80 -j DNAT --to-destination 192.168.50.10:80
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 443 -j DNAT --to-destination 192.168.50.10:443
+# iptables -I FORWARD -m state -d 192.168.50.10/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT
 ```
 
 ### 4.9 Restart the `iptables` service and make sure that the rules are still there afterwards.
 
+Then, save everything to persist when you reboot the `host`:
+
 ```
-$ sudo systemctl restart iptables
-$ sudo systemctl status iptables
+# iptables-save > /etc/sysconfig/iptables
+# systemctl restart iptables
 ```
 
 ### 4.10 Enable and start dnsmasq (if its not already running)
@@ -502,7 +499,7 @@ PS. If you get the following error during image build process:
 dial tcp: lookup docker-registry.default.svc on 8.8.8.8:53
 ```
 It's because your registry cannot be found inside cluster. I don't know what may have did this, I had to add the following line in `guest` VM `/etc/hosts` file:<br>
-`172.30.73.96   docker-registry.default.svc docker-registry.default.svc.cluster.local`<br>where `172.30.73.96` is the docker registry cluster ip address obtained from:
+`172.30.73.96   docker-registry.default.svc docker-registry.default.svc.cluster.local docker-registry-default.apps.arekkusu.io`<br>where `172.30.73.96` is the docker registry cluster ip address obtained from:
 
 ```
 $ oc get svc -n default
@@ -559,3 +556,34 @@ Test: `ping myapp-demo.apps.arekkusu.io`<br>
 
 Voilá! If you have reached this point, you're ready to go! :sunglasses:<br>
 Thank you and if you want to contribute don't hesitate. :satisfied:
+
+# APPENDIX A - Create a new cluster user
+
+Login into cluster with your admin user:
+
+```
+$ oc login https://console.arekkusu.io:8443 -p $(oc whoami -t)
+```
+
+Add a new user (for `htpasswd` identity provider):
+```
+$ oc create user developer
+$ oc adm policy add-cluster-role-to-user cluster-admin developer
+$ oc policy add-role-to-user registry-editor developer -n default
+$ oc policy add-role-to-user registry-viewer developer -n default
+```
+
+Access the `guest` VM:
+```
+$ ssh root@192.168.50.10 
+```
+Create a username/password combination (`<user>:<hash>`) for your new user:
+```
+htpasswd -nb developer developer12345
+```
+Navigate to `/etc/origin/master` and append the output from the command above in the `htpasswd` file:
+
+```
+vi /etc/origin/master/htpasswd
+# add the username/password from developer
+```
