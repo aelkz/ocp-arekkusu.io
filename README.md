@@ -460,14 +460,20 @@ The following rules are necessary to enable openshift applications be accessible
 # iptables -I FORWARD -m state -d 192.168.50.10/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT
 ```
 
-### 4.9 Restart the `iptables` service and make sure that the rules are still there afterwards.
+### 4.9 Install libvirt qemu hook script to make sure that the rules are still there upon reboot.
 
-Then, save everything to persist when you reboot the `host`:
+Usually you'll just need to save the previously created iptables rules into `/etc/syconfig/iptables`. But libvirtd process don't works that way. You need to apply the iptables rules upon `guest` start.
 
+So, saving everything to persist when you reboot the `host` using the following will not work:
 ```
 # iptables-save > /etc/sysconfig/iptables
 # systemctl restart iptables
 ```
+
+Will need to create a custom script that will hook the libvirt starting process.
+To do so, check the ![qemu](addons/qemu") script and follow it's orientations.
+
+Maybe you'll need to restart the `host` in order to work properly.
 
 ### 4.10 Enable and start dnsmasq (if its not already running)
 
