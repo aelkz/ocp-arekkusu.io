@@ -556,3 +556,34 @@ Test: `ping myapp-demo.apps.arekkusu.io`<br>
 
 Voilá! If you have reached this point, you're ready to go! :sunglasses:<br>
 Thank you and if you want to contribute don't hesitate. :satisfied:
+
+# APPENDIX A - Create a new cluster user
+
+Login into cluster with your admin user:
+
+```
+$ oc login https://console.arekkusu.io:8443 -p $(oc whoami -t)
+```
+
+Add a new user (for `htpasswd` identity provider):
+```
+$ oc create user developer
+$ oc adm policy add-cluster-role-to-user cluster-admin developer
+$ oc policy add-role-to-user registry-editor developer -n default
+$ oc policy add-role-to-user registry-viewer developer -n default
+```
+
+Access the `guest` VM:
+```
+$ ssh root@192.168.50.10 
+```
+Create a username/password combination (`<user>:<hash>`) for your new user:
+```
+htpasswd -nb developer developer12345
+```
+Navigate to `/etc/origin/master` and append the output from the command above in the `htpasswd` file:
+
+```
+vi /etc/origin/master/htpasswd
+# add the username/password from developer
+```
