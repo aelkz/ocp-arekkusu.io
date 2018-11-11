@@ -460,17 +460,13 @@ The following rules are necessary to enable openshift applications be accessible
 # iptables -I FORWARD -m state -d 192.168.50.10/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT
 ```
 
-Then, save everything to persist when reboot:
+### 4.9 Restart the `iptables` service and make sure that the rules are still there afterwards.
+
+Then, save everything to persist when you reboot the `host`:
+
 ```
 # iptables-save > /etc/sysconfig/iptables
 # systemctl restart iptables
-```
-
-### 4.9 Restart the `iptables` service and make sure that the rules are still there afterwards.
-
-```
-$ sudo systemctl restart iptables
-$ sudo systemctl status iptables
 ```
 
 ### 4.10 Enable and start dnsmasq (if its not already running)
