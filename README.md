@@ -147,20 +147,6 @@ To enable guest request forwarding you need to enable the `net.ipv4.ip_forward=1
 echo "net.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/99-ipforward.conf
 sudo sysctl -p /etc/sysctl.d/99-ipforward.conf
 ```
-
-### 1.6 Configure iptables rules
-
-The following rules are necessary to enable openshift applications be accessible from LAN, as the `guest` is **NAT**ed:
-```
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8443 -j DNAT --to-destination 192.168.50.10:8443
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8080 -j DNAT --to-destination 192.168.50.10:8080
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 80 -j DNAT --to-destination 192.168.50.10:80
-iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 443 -j DNAT --to-destination 192.168.50.10:443
-iptables -I FORWARD -m state -d 192.168.50.10/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT
-```
-
-PS. There are other ways to do this, you may want to use `firewalld` instead.
-
 ## 2. Setup libvirt guest (VM)
 
 ### 2.1 Setup libvirt using virt-manager
@@ -448,21 +434,36 @@ Otherwise, the `openshift-ansible` playbook will disable and mask it and we will
 replace it with `iptables-services`:
 
     ```
-    # systemctl stop firewalld
-    # systemctl disable firewalld
-    # systemctl mask firewalld
-    # yum install -y iptables-services
-    # systemctl enable iptables
-    # systemctl start iptables
+    # yum -y install iptables-services; systemctl disable firewalld; systemctl mask firewalld; service iptables restart; service iptables save
     ```
 
 ### 4.8 Install the DNS iptables rules (main cluster)
 
-Rules for dnsmasq service:
+First, create a backup of your existing iptables rules:
+```
+# cp /etc/sysconfig/iptables-config /etc/sysconfig/iptables-config.original.backup
+# cp /etc/sysconfig/iptables /etc/sysconfig/iptables.original.backup
+```
+
+Add rules for dnsmasq service:
 ```
 # iptables -I INPUT 1 -p TCP --dport 53 -j ACCEPT
 # iptables -I INPUT 1 -p UDP --dport 53 -j ACCEPT
+```
+
+The following rules are necessary to enable openshift applications be accessible from LAN, as the `guest` is **NAT**ed:
+```
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8443 -j DNAT --to-destination 192.168.50.10:8443
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 8080 -j DNAT --to-destination 192.168.50.10:8080
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 80 -j DNAT --to-destination 192.168.50.10:80
+# iptables -t nat -I PREROUTING -p tcp -d 192.168.0.10 --dport 443 -j DNAT --to-destination 192.168.50.10:443
+# iptables -I FORWARD -m state -d 192.168.50.10/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT
+```
+
+Then, save everything to persist when reboot:
+```
 # iptables-save > /etc/sysconfig/iptables
+# systemctl restart iptables
 ```
 
 ### 4.9 Restart the `iptables` service and make sure that the rules are still there afterwards.
