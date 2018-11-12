@@ -483,9 +483,38 @@ Maybe you'll need to restart the `host` in order to work properly.
 # systemctl start dnsmasq
 ```
 
-## 5. Test everything!
+## 5. Configure NetworkManager and dnsmasq across LAN devices
 
-### 4.1 First test: create a demo app.
+### 5.1 Configure dnsmasq
+
+If you want enable \*.apps.arekkusu.io discovery across another devices from LAN, you'need to setup the embedded dnsmasq of NetworkManager. This configuration works also with WiFi enabled devices, such a laptop that uses the same SSID of your `host`. 
+
+Create a file like `/etc/NetworkManager/dnsmasq.d/openshift.conf` and add the following:
+
+```
+address=/.apps.arekkusu.io/192.168.0.10
+address=/console.arekkusu.io/192.168.0.10
+```
+
+Then, edit the file `/etc/NetworkManager/NetworkManager.conf` and add the following under `[main]` section:
+
+```
+[main]
+#plugins=ifcfg-rh,ibft
+dns=dnsmasq
+```
+
+Restart your NetworkManager:
+
+```
+$ sudo systemctl restart NetworkManager
+```
+
+If everything was successful, you'll be able to access the \*.apps.arekkusu.io applications inside openshift at `192.168.50.10` `guest` VM that is hosted at `192.168.0.10`.
+
+## 6. Test everything!
+
+### 6.1 First test: create a demo app.
 
 First of all, we want to make sure everything is working fine through the OKD `host`.
 ssh into `host` at `192.168.0.10` and let's create a demo application.
@@ -531,7 +560,7 @@ You should see your application running:
 Test your application, opening the web browser: `http://myapp-demo.apps.arekkusu.io` or via curl:<br>
 `curl -s -o /dev/null -w "%{http_code}" http://myapp-demo.apps.arekkusu.io` and check if it returns status code 200.
 
-### 4.2 Second test: access custom addresses inside myapp's POD.
+### 6.2 Second test: access custom addresses inside myapp's POD.
 
 This will ensure that your POD can communicate with another PODs using your cluster DNS.
 Also it will test if you can access custom created routes.
@@ -552,7 +581,7 @@ Test: `ping myapp-demo-internal.192.168.50.10.nip.io`<br>
 
 All hostnames must be pingable. You can also use `dig` command (change the hostnames accordingly to your environment).
 
-### 4.3 Final test: access custom addresses from another computer inside LAN.
+### 6.3 Final test: access custom addresses from another computer inside LAN.
 
 From the same WiFi network, test if another computer can access the addresses tested previously.
 Get into a laptop computer or another Desktop PC and execute the following commands:
