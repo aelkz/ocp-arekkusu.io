@@ -483,7 +483,7 @@ Maybe you'll need to restart the `host` in order to work properly.
 # systemctl start dnsmasq
 ```
 
-## 5. Configure NetworkManager and dnsmasq across LAN devices
+## 5. Configure NetworkManager and dnsmasq (other devices from LAN)
 
 ### 5.1 Configure dnsmasq
 
