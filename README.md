@@ -99,7 +99,7 @@ $ sudo shutdown -r now
 
 PS. If you're using another directory to host the libvirt `.qcow2` disks and images, maybe you'll need to add permissions to qemu user:
 ```
-setfacl -m 'u:qemu:rwx' /home/{some-user}/{your-custom-libvirt-images}
+setfacl -m 'u:qemu:rwx' /home/{user}/{your-custom-libvirt-images-directory}
 ```
 
 ### 1.4 Configure host network
