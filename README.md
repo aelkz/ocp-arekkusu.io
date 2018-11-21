@@ -225,6 +225,12 @@ virt-install -n "openshift" --ram 26000 --vcpus 6 --metadata description="opensh
 
 Your guest will start to install :boom: *automagically* :boom: and after you will be prompted for root access in the console.
 
+Remember to check your firewall configuration. Flushing or disabling iptables could do the trick:
+```
+iptables -F
+iptables -L
+```
+
 Tip:
 The `server-ks-openshift.cfg` file have the root password defined as `admin12345`
 
