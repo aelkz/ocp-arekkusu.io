@@ -90,6 +90,9 @@ After the OS installation steps, execute the following in the terminal:
 
 ```
 $ sudo dnf install -y qemu-kvm libvirt virt-manager virt-install bridge-utils net-tools nmap git docker
+$ sudo systemctl start libvirtd.service 
+$ sudo systemctl enable libvirtd.service
+
 $ sudo gpasswd -a "${USER}" libvirt
 $ sudo shutdown -r now
 ```
