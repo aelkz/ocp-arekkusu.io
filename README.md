@@ -19,7 +19,7 @@ easily change their DNS setup outside of the cluster, or just because they want 
 - You can't modify external DNS and/or your router sux :angry:
 - You can't modify your router or anything but your libvirt host :cry:
 - You want to expose your cloud inside a LAN (WiFi) not internet :heavy_check_mark:
-- You don't want to use minishift project or understand more about OKD installation process:heavy_check_mark:
+- You don't want to use minishift project or want to understand more about OKD installation process:heavy_check_mark:
 - You have a 'bulky' laptop or Desktop PC for use as dedicated openshit cluster and want to work from another computer with development tools only :heavy_check_mark:
 
 This is meant to be done *before* you run the `openshift-ansible` playbook, but it can be adjusted if you have already installed openshift using `openshift-ansible` playbook.
