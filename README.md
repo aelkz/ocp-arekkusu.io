@@ -184,6 +184,7 @@ PS. In case you messed up with your virsh network, just restore it with the foll
 ```
 
 Then, add the guest ISO image in the storage section (I'll be using [CentOS-7.5.1804](http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso)):
+
 The iso will be pulled upon VM creation as defined in our `kickstart.cfg` file.
 
 ![iso](images/02/c.png "CentOS 7 iso file")
