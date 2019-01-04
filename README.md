@@ -169,6 +169,20 @@ If you don't, create a new one following the image below:
 To keep this virtual-network active every boot, then execute:<br>
 `$ sudo virsh net-autostart default`
 
+You can also check the xml dump file:
+`# virsh net-dumpxml default > default.xml`
+
+It will generate a file similar with the following content:
+
+![virtual-network](images/02/f.png "virsh net-dumpxml default > default.xml")
+
+PS. In case you messed up with your virsh network, just restore it with the following:
+```
+# virsh net-destroy default
+# virsh net-define default.xml
+# virsh net-start default
+```
+
 Then, install the guest ISO image (I'll be using [CentOS-7.5.1804](http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso)):
 ![iso](images/02/c.png "CentOS 7 iso file")
 
