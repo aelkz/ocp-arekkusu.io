@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="406379f1-40dc-460a-94e7-697349d63fc8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/images/02/f.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -44,14 +42,14 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="cfg" value="29" />
-          <entry key="md" value="12278" />
+          <entry key="md" value="12391" />
           <entry key="txt" value="15" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Ini" value="29" />
-          <entry key="Markdown" value="12278" />
+          <entry key="Markdown" value="12391" />
           <entry key="PLAIN_TEXT" value="15" />
         </counts>
       </usages-collector>
@@ -63,8 +61,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="490">
-                <caret line="182" column="25" lean-forward="true" selection-start-line="182" selection-start-column="25" selection-end-line="182" selection-end-column="25" />
+              <first_editor relative-caret-position="400">
+                <caret line="188" selection-start-line="188" selection-end-line="188" />
               </first_editor>
               <second_editor />
             </state>
@@ -195,7 +193,7 @@
       <workItem from="1541768277164" duration="2000" />
       <workItem from="1541768861983" duration="643000" />
       <workItem from="1544262544483" duration="83000" />
-      <workItem from="1546604834204" duration="465000" />
+      <workItem from="1546604834204" duration="585000" />
     </task>
     <task id="LOCAL-00001" summary="INITIAL RELEASE">
       <created>1541641656397</created>
@@ -274,11 +272,18 @@
       <option name="project" value="LOCAL" />
       <updated>1541723420056</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="INITIAL RELEASE">
+      <created>1546605308276</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1546605308278</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="28926000" />
+    <option name="totallyTimeSpent" value="29046000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
@@ -348,8 +353,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="490">
-            <caret line="182" column="25" lean-forward="true" selection-start-line="182" selection-start-column="25" selection-end-line="182" selection-end-column="25" />
+          <first_editor relative-caret-position="400">
+            <caret line="188" selection-start-line="188" selection-end-line="188" />
           </first_editor>
           <second_editor />
         </state>
