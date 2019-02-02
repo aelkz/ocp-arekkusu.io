@@ -525,8 +525,8 @@ If you want enable \*.apps.arekkusu.io discovery across another devices from LAN
 Create a file like `/etc/NetworkManager/dnsmasq.d/openshift.conf` and add the following:
 
 ```
-address=/.apps.arekkusu.io/192.168.0.10
-address=/console.arekkusu.io/192.168.0.10
+address=/.apps.arekkusu.io/192.168.1.10
+address=/console.arekkusu.io/192.168.1.10
 ```
 
 Then, edit the file `/etc/NetworkManager/NetworkManager.conf` and add the following under `[main]` section:
