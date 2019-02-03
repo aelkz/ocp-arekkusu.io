@@ -645,7 +645,7 @@ You'll see something like the result bellow:
 console.arekkusu.io.	0	IN	A	192.168.1.10
 ```
 
-Credits:
+Credits:<br>
 https://www.stevenrombauts.be/2018/01/use-dnsmasq-instead-of-etc-hosts<br>
 https://blog.thesparktree.com/local-development-with-wildcard-dns<br>
 https://www.sothawo.com/2018/04/adding-local-dns-resolution-for-a-custom-top-level-domain-on-macos-using-macports<br>
