@@ -646,13 +646,13 @@ console.arekkusu.io.	0	IN	A	192.168.1.10
 ```
 
 Credits:
-https://www.stevenrombauts.be/2018/01/use-dnsmasq-instead-of-etc-hosts
-https://blog.thesparktree.com/local-development-with-wildcard-dns
-https://www.sothawo.com/2018/04/adding-local-dns-resolution-for-a-custom-top-level-domain-on-macos-using-macports
-https://medium.com/@narakuw/brew-install-dnsmasq-in-macos-sierra-26021c824be8
-https://gist.github.com/aelkz/01f2980daca2ac9a4d653a2936411bb2
-https://gist.github.com/aelkz/cabfed5e8980c85d721cb9ef1ff804ee
-https://passingcuriosity.com/2013/dnsmasq-dev-osx/
+https://www.stevenrombauts.be/2018/01/use-dnsmasq-instead-of-etc-hosts<br>
+https://blog.thesparktree.com/local-development-with-wildcard-dns<br>
+https://www.sothawo.com/2018/04/adding-local-dns-resolution-for-a-custom-top-level-domain-on-macos-using-macports<br>
+https://medium.com/@narakuw/brew-install-dnsmasq-in-macos-sierra-26021c824be8<br>
+https://gist.github.com/aelkz/01f2980daca2ac9a4d653a2936411bb2<br>
+https://gist.github.com/aelkz/cabfed5e8980c85d721cb9ef1ff804ee<br>
+https://passingcuriosity.com/2013/dnsmasq-dev-osx/<br>
 
 
 ## 6. Test everything!
