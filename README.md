@@ -518,7 +518,7 @@ Maybe you'll need to restart the `host` in order to work properly.
 
 ## 5. Configure NetworkManager and dnsmasq (other devices from LAN)
 
-### 5.1 Configure dnsmasq
+### 5.1 Configure dnsmasq (Fedora/CentOS distros)
 
 If you want enable \*.apps.arekkusu.io discovery across another devices from LAN, you'need to setup the embedded dnsmasq of NetworkManager. This configuration works also with WiFi enabled devices, such a laptop that uses the same SSID of your `host`. 
 
@@ -544,6 +544,116 @@ $ sudo systemctl restart NetworkManager
 ```
 
 If everything was successful, you'll be able to access the \*.apps.arekkusu.io applications inside openshift at `192.168.50.10` `guest` VM that is hosted at `192.168.0.10`.
+
+### 5.2 Configure dnsmasq (MAC OSX -> working w/ Mojave 10.14.3)
+
+So, to got it working for macOS, you'll need to execute the following steps:
+
+Install dnsmasq with homebrew:
+
+```
+brew update # Always update Homebrew and the formulae first
+brew install dnsmasq
+```
+
+Edit the dnsmasq configuration file:
+
+`vim /usr/local/etc/dnsmasq.conf`
+
+Now, lets uncomment/modify the following lines:
+
+```
+close to line number #19:
+domain-needed
+
+close to line number #21:
+bogus-priv
+
+close to line number #53:
+strict-order
+
+close to line number #58:
+no-resolv
+
+close to line number #79:
+address=/.apps.arekkusu.io/192.168.1.10
+address=/console.arekkusu.io/192.168.1.10
+
+close to line number #676:
+conf-dir=/usr/local/etc/dnsmasq.d/,*.conf
+```
+
+Navigate to dnsmasq.d folder:
+
+`cd /usr/local/etc/dnsmasq.d`
+
+Create a file named `openshift.conf` with the following content:
+
+```
+address=/.apps.arekkusu.io/192.168.1.10
+address=/console.arekkusu.io/192.168.1.10
+```
+
+Create a directory for custom domain resolvers:
+
+```
+sudo mkdir /etc/resolver
+cd /etc/resolver
+```
+
+Create a file named `arekkusu.io` with the following content:
+
+```
+nameserver 127.0.0.1
+```
+
+After doing every step listed above, now it's time to check:
+
+Restart `dnsmasq` service
+
+```
+$ sudo brew services stop dnsmasq
+$ sudo brew services restart dnsmasq
+$ sudo launchctl unload /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
+$ sudo launchctl load /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
+$ dscacheutil -flushcache
+```
+
+Execute the following:
+
+`$ scutil --dns`
+
+You'll see something like the result bellow:
+
+```
+resolver #8
+  domain   : arekkusu.io
+  nameserver[0] : 127.0.0.1
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00030002 (Reachable,Local Address,Directly Reachable Address)
+```
+
+Execute this second command: 
+
+`$ dig console.arekkusu.io @localhost +noall +answer`
+
+You'll see something like the result bellow:
+
+```
+; <<>> DiG 9.10.6 <<>> console.arekkusu.io @localhost +noall +answer
+;; global options: +cmd
+console.arekkusu.io.	0	IN	A	192.168.1.10
+```
+
+Credits:
+https://www.stevenrombauts.be/2018/01/use-dnsmasq-instead-of-etc-hosts
+https://blog.thesparktree.com/local-development-with-wildcard-dns
+https://www.sothawo.com/2018/04/adding-local-dns-resolution-for-a-custom-top-level-domain-on-macos-using-macports
+https://medium.com/@narakuw/brew-install-dnsmasq-in-macos-sierra-26021c824be8
+https://gist.github.com/aelkz/01f2980daca2ac9a4d653a2936411bb2
+https://gist.github.com/aelkz/cabfed5e8980c85d721cb9ef1ff804ee
+https://passingcuriosity.com/2013/dnsmasq-dev-osx/
+
 
 ## 6. Test everything!
 
