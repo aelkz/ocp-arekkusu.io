@@ -759,10 +759,18 @@ $ ssh root@192.168.50.10
 Create a username/password combination (`<user>:<hash>`) for your new user:
 ```
 htpasswd -nb developer developer12345
+or $ sudo htpasswd -c /etc/origin/master/htpasswd ocpAdmin
 ```
 Navigate to `/etc/origin/master` and append the output from the command above in the `htpasswd` file:
 
 ```
 vi /etc/origin/master/htpasswd
 # add the username/password from developer
+```
+
+Grant OpenShift admin and cluster admin roles to this user, so it can create persistent volumes:
+
+```
+$ sudo oadm policy add-cluster-role-to-user admin ocpAdmin
+$ sudo oadm policy add-cluster-role-to-user cluster-admin ocpAdmin
 ```
