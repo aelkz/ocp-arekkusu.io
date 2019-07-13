@@ -301,7 +301,7 @@ Access guest through ssh protocol again:<br>
 
 Execute the *openshift-ansible playbook* from [gshipley installcentos scripts](https://github.com/gshipley/installcentos) installation script: 
 ```
-git clone https://github.com/gshipley/installcentos.git
+git clone https://github.com/aelkz/installcentos.git
 
 export DOMAIN=arekkusu.io
 export USERNAME=admin
